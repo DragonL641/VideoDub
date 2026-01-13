@@ -118,7 +118,7 @@ jobs:
     
     # 将安全扫描结果作为工件存档保存
     - name: Archive security results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         # 工件名称
         name: security-results
@@ -146,7 +146,7 @@ jobs:
     
     # 根据requirements.txt生成XML格式的SBOM文件
     - name: Generate SBOM
-      run: cyclonedx-py -i requirements.txt -o bom.xml --format xml
+      run: cyclonedx-py environment --format xml -o bom.xml
     
     # 将生成的SBOM文件作为工件上传保存
     - name: Upload SBOM artifact
