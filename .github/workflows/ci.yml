@@ -1,7 +1,6 @@
 # GitHub Actions 工作流配置文件
 # 定义项目的持续集成/持续部署(CI/CD)自动化流程
 
-# 工作流名称
 name: CI/CD Pipeline
 
 on:
@@ -12,9 +11,7 @@ on:
   pull_request:
     branches: [ main ]
 
-# 定义工作流中的各个作业(job)
 jobs:
-  # 测试套件作业 - 在多个Python版本上运行单元测试
   test:
     name: Test Suite
     # 运行环境 - 使用最新的Ubuntu系统
