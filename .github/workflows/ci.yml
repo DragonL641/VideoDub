@@ -4,7 +4,6 @@
 # 工作流名称
 name: CI/CD Pipeline
 
-# 触发条件定义
 on:
   # 当推送到 main 和 develop 分支时触发
   push:
@@ -17,17 +16,14 @@ on:
 jobs:
   # 测试套件作业 - 在多个Python版本上运行单元测试
   test:
-    # 作业显示名称
     name: Test Suite
     # 运行环境 - 使用最新的Ubuntu系统
     runs-on: ubuntu-latest
     # 策略配置 - 矩阵策略允许在多个Python版本上并行测试
     strategy:
       matrix:
-        # 定义要测试的Python版本矩阵
-        python-version: [3.9, 3.10, 3.11, 3.12]
-    
-    # 定义作业的具体执行步骤
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+
     steps:
     # 步骤1: 检出代码仓库
     - uses: actions/checkout@v4
@@ -36,7 +32,7 @@ jobs:
     - name: Run tests with coverage
       run: |
         # 使用pytest运行测试，并生成XML格式的覆盖率报告
-        pytest --cov=videodub --cov-report=xml
+        pytest tests/ --cov=videodub --cov-report=xml
     
     # 步骤5: 将覆盖率报告上传到Codecov
     - name: Upload coverage to Codecov
@@ -51,7 +47,7 @@ jobs:
     
     - name: Run tests with coverage
       run: |
-        pytest --cov=videodub --cov-report=xml
+        pytest tests/ --cov=videodub --cov-report=xml
     
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
