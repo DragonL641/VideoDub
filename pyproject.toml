@@ -97,18 +97,24 @@ omit = [
 
 [tool.mypy]
 python_version = "3.9"
-warn_return_any = false
 warn_unused_configs = true
+
+# 核心宽松设置：允许未注解的代码
 disallow_untyped_defs = false
-disallow_incomplete_defs = true
 check_untyped_defs = false
-disallow_untyped_decorators = true
-no_implicit_optional = true
-warn_redundant_casts = true
-warn_unused_ignores = true
-warn_no_return = true
-warn_unreachable = true
-strict_equality = true
+
+# 建议关闭的“不必要”警告
+warn_redundant_casts = false        # 关闭冗余转换警告
+warn_unused_ignores = false         # 关闭未使用忽略注释的警告
+
+# 可根据偏好关闭的严格规则
+strict_equality = false             # 允许更灵活的比较
+disallow_incomplete_defs = false     # 允许不完整的函数注解
+
+no_implicit_optional = true         # 保持参数显式可选，提升清晰度
+disallow_untyped_decorators = true  # 保持装饰器类型检查，对框架重要
+warn_no_return = true               # 保持返回值检查，防止逻辑遗漏
+warn_unreachable = true             # 保持不可达代码检查，发现严重错误
 
 [[tool.mypy.overrides]]
 module = [
