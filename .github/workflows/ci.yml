@@ -29,6 +29,7 @@ jobs:
     - name: Run tests with coverage
       run: |
         # 使用pytest运行测试，并生成XML格式的覆盖率报告
+        pip install -r requirements-dev.txt
         pytest tests/ --cov=videodub --cov-report=xml
     
     # 步骤5: 将覆盖率报告上传到Codecov
