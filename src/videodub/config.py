@@ -20,7 +20,17 @@ class Config:
     TEMP_AUDIO_FILE: str = "temp_audio.wav"
 
     # Model settings
-    AVAILABLE_MODELS: List[str] = field(default_factory=lambda: ["tiny", "base", "small", "medium", "large", "large-v2", "large-v3"])
+    AVAILABLE_MODELS: List[str] = field(
+        default_factory=lambda: [
+            "tiny",
+            "base",
+            "small",
+            "medium",
+            "large",
+            "large-v2",
+            "large-v3",
+        ]
+    )
 
     # Translation settings
     DEFAULT_USE_EN_AS_INTERMEDIATE: bool = False

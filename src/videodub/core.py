@@ -13,13 +13,13 @@ def generate_subtitles(
 ) -> str:
     """
     Generate subtitles for a video file.
-    
+
     Args:
         video_path: Path to the video file
         src_lang: Source language code (default: 'ja')
         tgt_lang: Target language code (default: 'zh')
         use_en_as_intermediate: Whether to use English as intermediate language
-        
+
     Returns:
         Path to the generated subtitle file
     """
