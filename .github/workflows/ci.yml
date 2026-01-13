@@ -99,7 +99,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: "3.10"
+        python-version: "3.12"
     
     # 安装安全扫描工具
     - name: Install dependencies
@@ -110,7 +110,7 @@ jobs:
     
     # 运行Bandit安全扫描，递归扫描src目录，输出JSON格式结果
     - name: Run Bandit security scan
-      run: bandit -r src/ -f json -o bandit-results.json
+      run: bandit -r src/ -f html -o bandit_report.html
     
     # 运行Safety依赖安全检查，生成完整报告
     - name: Run Safety dependency check
@@ -138,7 +138,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: "3.10"
+        python-version: "3.12"
     
     # 安装CycloneDX SBOM生成工具
     - name: Install cyclonedx-bom
@@ -146,7 +146,7 @@ jobs:
     
     # 根据requirements.txt生成XML格式的SBOM文件
     - name: Generate SBOM
-      run: cyclonedx-py environment --format xml -o bom.xml
+      run: cyclonedx-py environment --output-format xml -o bom.xml
     
     # 将生成的SBOM文件作为工件上传保存
     - name: Upload SBOM artifact
@@ -173,7 +173,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: "3.10"
+        python-version: "3.12"
     
     # 安装构建工具
     - name: Install build tools
