@@ -8,5 +8,5 @@ pre-commit==3.5.0
 build==1.0.3
 twine==4.0.2
 bandit==1.7.5
-safety==2.4.0
+safety==3.7.0
 cyclonedx-bom==3.11.2
