@@ -1,31 +1,53 @@
+# GitHub Actions 工作流配置文件
+# 定义项目的持续集成/持续部署(CI/CD)自动化流程
+
+# 工作流名称
 name: CI/CD Pipeline
 
+# 触发条件定义
 on:
+  # 当推送到 main 和 develop 分支时触发
   push:
     branches: [ main, develop ]
+  # 当创建针对 main 分支的 Pull Request 时触发
   pull_request:
     branches: [ main ]
 
+# 定义工作流中的各个作业(job)
 jobs:
+  # 测试套件作业 - 在多个Python版本上运行单元测试
   test:
+    # 作业显示名称
     name: Test Suite
+    # 运行环境 - 使用最新的Ubuntu系统
     runs-on: ubuntu-latest
+    # 策略配置 - 矩阵策略允许在多个Python版本上并行测试
     strategy:
       matrix:
-        python-version: [3.8, 3.9, "3.10", 3.11]
+        # 定义要测试的Python版本矩阵
+        python-version: [3.9, 3.10, 3.11, 3.12]
     
+    # 定义作业的具体执行步骤
     steps:
+    # 步骤1: 检出代码仓库
     - uses: actions/checkout@v4
     
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-    
-    - name: Install dependencies
+    # 步骤4: 运行测试并生成覆盖率报告
+    - name: Run tests with coverage
       run: |
-        python -m pip install --upgrade pip
-        pip install -e .[dev]
+        # 使用pytest运行测试，并生成XML格式的覆盖率报告
+        pytest --cov=videodub --cov-report=xml
+    
+    # 步骤5: 将覆盖率报告上传到Codecov
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        # 指定要上传的覆盖率文件
+        file: ./coverage.xml
+        # 设置标记用于区分不同类型的测试
+        flags: unittests
+        # 上传任务的名称标识
+        name: codecov-umbrella
     
     - name: Run tests with coverage
       run: |
@@ -38,111 +60,149 @@ jobs:
         flags: unittests
         name: codecov-umbrella
 
+  # 代码质量检查作业 - 验证代码风格和类型安全
   lint:
     name: Code Quality Checks
     runs-on: ubuntu-latest
     
     steps:
+    # 检出代码仓库
     - uses: actions/checkout@v4
     
+    # 设置Python环境(使用固定版本3.10进行质量检查)
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: "3.10"
     
+    # 安装代码质量检查工具
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        # 安装代码格式化工具Black、代码风格检查工具Flake8和类型检查工具MyPy
         pip install black flake8 mypy
     
+    # 使用Black检查代码格式是否符合规范
     - name: Check code formatting with Black
       run: black --check src/ tests/
     
+    # 使用Flake8检查代码风格问题
     - name: Check code style with Flake8
       run: flake8 src/ tests/
     
+    # 使用MyPy进行静态类型检查
     - name: Type checking with MyPy
       run: mypy src/
 
+  # 安全扫描作业 - 检测代码和依赖中的安全漏洞
   security:
     name: Security Scanning
     runs-on: ubuntu-latest
     
     steps:
+    # 检出代码仓库
     - uses: actions/checkout@v4
     
+    # 设置Python环境
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: "3.10"
     
+    # 安装安全扫描工具
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        # 安装Bandit(源码安全扫描)和Safety(依赖安全检查)
         pip install bandit safety
     
+    # 运行Bandit安全扫描，递归扫描src目录，输出JSON格式结果
     - name: Run Bandit security scan
       run: bandit -r src/ -f json -o bandit-results.json
     
+    # 运行Safety依赖安全检查，生成完整报告
     - name: Run Safety dependency check
       run: safety check --full-report
     
+    # 将安全扫描结果作为工件存档保存
     - name: Archive security results
       uses: actions/upload-artifact@v3
       with:
+        # 工件名称
         name: security-results
+        # 要上传的文件路径
         path: bandit-results.json
 
+  # 软件物料清单(SBOM)生成作业 - 创建项目依赖的软件清单
   sbom:
     name: Generate SBOM
     runs-on: ubuntu-latest
     
     steps:
+    # 检出代码仓库
     - uses: actions/checkout@v4
     
+    # 设置Python环境
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: "3.10"
     
+    # 安装CycloneDX SBOM生成工具
     - name: Install cyclonedx-bom
       run: pip install cyclonedx-bom
     
+    # 根据requirements.txt生成XML格式的SBOM文件
     - name: Generate SBOM
       run: cyclonedx-py -i requirements.txt -o bom.xml --format xml
     
+    # 将生成的SBOM文件作为工件上传保存
     - name: Upload SBOM artifact
       uses: actions/upload-artifact@v3
       with:
+        # 工件名称
         name: software-bill-of-materials
+        # SBOM文件路径
         path: bom.xml
 
+  # 包构建作业 - 构建可发布的Python包
+  # 依赖于test和lint作业的成功完成
   build:
     name: Build Package
     runs-on: ubuntu-latest
+    # 指定依赖关系：只有当test和lint作业都成功后才执行
     needs: [test, lint]
     
     steps:
+    # 检出代码仓库
     - uses: actions/checkout@v4
     
+    # 设置Python环境
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: "3.10"
     
+    # 安装构建工具
     - name: Install build tools
       run: |
         python -m pip install --upgrade pip
+        # 安装Python包构建工具(build)和包验证工具(twine)
         pip install build twine
     
+    # 执行包构建命令，生成wheel和sdist分发包
     - name: Build package
       run: python -m build
     
+    # 使用twine验证构建的包是否符合PyPI发布标准
     - name: Check package
       run: twine check dist/*
     
+    # 将构建好的包文件作为工件上传保存
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
       with:
+        # 工件名称
         name: python-package-distributions
+        # 构建产物目录路径
         path: dist/
