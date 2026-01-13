@@ -1,7 +1,5 @@
 """Simple tests for VideoDub."""
 
-import pytest
-
 
 def test_basic_import():
     """Test that we can import the main module."""

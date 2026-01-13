@@ -1,6 +1,5 @@
 """Tests for the VideoDub processing module."""
 
-import pytest
 from videodub.processing import VideoProcessor
 
 

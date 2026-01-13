@@ -1,6 +1,5 @@
 """Core functionality for VideoDub."""
 
-from typing import Optional
 from .config import Config
 from .processing import VideoProcessor
 

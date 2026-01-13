@@ -9,7 +9,7 @@ from .core import generate_subtitles
 from .config import Config
 
 
-def main():
+def main() -> None:
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
         description="Generate subtitles for videos using OpenAI Whisper",

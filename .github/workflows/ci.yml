@@ -55,22 +55,19 @@ jobs:
         flags: unittests
         name: codecov-umbrella
 
-  # 代码质量检查作业 - 验证代码风格和类型安全
+  # 代码质量检查作业
   lint:
     name: Code Quality Checks
     runs-on: ubuntu-latest
     
     steps:
-    # 检出代码仓库
     - uses: actions/checkout@v4
-    
-    # 设置Python环境(使用固定版本3.10进行质量检查)
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: "3.10"
-    
-    # 安装代码质量检查工具
+        python-version: "3.12"
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -153,7 +150,7 @@ jobs:
     
     # 将生成的SBOM文件作为工件上传保存
     - name: Upload SBOM artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         # 工件名称
         name: software-bill-of-materials

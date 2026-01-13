@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Dict, Any
 
 import ffmpeg
-import psutil
 import torch
 import whisper
 from transformers import pipeline
@@ -18,7 +17,7 @@ from .model_selection import select_optimal_model
 class VideoProcessor:
     """Handles video processing and subtitle generation."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.config = Config()
 
     def generate_subtitles(
@@ -124,7 +123,7 @@ class VideoProcessor:
         src_lang: str,
         tgt_lang: str,
         use_en_as_intermediate: bool,
-    ) -> Dict:
+    ) -> dict[Any, Any]:
         """Transcribe audio and translate if needed."""
         print("Recognizing speech...")
         transcription_result = model.transcribe(
