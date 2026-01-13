@@ -113,26 +113,35 @@ class VideoProcessor:
             # nosec B603: command arguments are hardcoded, no user input in command
             try:
                 import subprocess  # nosec B404
+
                 cmd = [
                     "ffmpeg",
-                    "-i", video_path,
-                    "-ar", str(self.config.AUDIO_SAMPLE_RATE),
-                    "-ac", "1",
+                    "-i",
+                    video_path,
+                    "-ar",
+                    str(self.config.AUDIO_SAMPLE_RATE),
+                    "-ac",
+                    "1",
                     "-y",
-                    "-loglevel", "error",
+                    "-loglevel",
+                    "error",
                     "-copyts",
-                    audio_path
+                    audio_path,
                 ]
                 # Validate paths before subprocess call
                 if not os.path.exists(video_path):
                     raise ValueError(f"Input file does not exist: {video_path}")
                 if not os.path.isabs(audio_path):
                     raise ValueError(f"Audio path must be absolute: {audio_path}")
-                
-                subprocess.run(cmd, check=True, capture_output=True, shell=False)  # nosec B603
+
+                subprocess.run(
+                    cmd, check=True, capture_output=True, shell=False
+                )  # nosec B603
             except Exception as subproc_error:
                 print(f"Subprocess fallback also failed: {subproc_error}")
-                raise RuntimeError(f"Unable to extract audio from {video_path}") from subproc_error
+                raise RuntimeError(
+                    f"Unable to extract audio from {video_path}"
+                ) from subproc_error
 
         return audio_path
 
@@ -184,7 +193,9 @@ class VideoProcessor:
                         )
                         result["segments"][i]["text"] = translated_text
                     except Exception as translation_error:
-                        print(f"Warning: Translation failed for segment {i}: {translation_error}")
+                        print(
+                            f"Warning: Translation failed for segment {i}: {translation_error}"
+                        )
                         # Keep original text if translation fails
 
         except Exception as e:
@@ -244,7 +255,9 @@ class VideoProcessor:
 
                         result["segments"][i]["text"] = final_text
                     except Exception as translation_error:
-                        print(f"Warning: Two-step translation failed for segment {i}: {translation_error}")
+                        print(
+                            f"Warning: Two-step translation failed for segment {i}: {translation_error}"
+                        )
                         # Keep original text if translation fails
 
         except Exception:
@@ -261,7 +274,9 @@ class VideoProcessor:
                         )
                         result["segments"][i]["text"] = translated_text
                     except Exception as translation_error:
-                        print(f"Warning: Source to English translation failed for segment {i}: {translation_error}")
+                        print(
+                            f"Warning: Source to English translation failed for segment {i}: {translation_error}"
+                        )
                         # Keep original text if translation fails
 
         return result
