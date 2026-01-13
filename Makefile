@@ -1,26 +1,81 @@
-.PHONY: install update test lint format check clean help
+# Makefile for VideoDub development
+
+.PHONY: help install test check clean build docs publish
 
 # Default target
-help: ## Show this help message
-	@echo "Available targets:"
-	@grep -E '^[a-zA-Z_0-9%-]+:.*?## .*$$' $(word 1,$(MAKEFILE_LIST)) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "%-30s %s\n", $$1, $$2}'
+help:
+	@echo "VideoDub Development Commands:"
+	@echo "  install    - Install development dependencies"
+	@echo "  test       - Run tests with coverage"
+	@echo "  check      - Run all code quality checks"
+	@echo "  format     - Format code with Black"
+	@echo "  lint       - Run linting checks"
+	@echo "  type-check - Run type checking"
+	@echo "  clean      - Clean build artifacts"
+	@echo "  build      - Build package distributions"
+	@echo "  docs       - Build documentation"
+	@echo "  publish    - Publish to PyPI (requires credentials)"
 
-install: ## Install the package and dependencies
-	pip install -r requirements.txt
-	pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+# Install development dependencies
+install:
+	pip install -e .[dev]
 
-update: ## Update dependencies
-	pip install --upgrade -r requirements.txt
+# Run tests
+test:
+	pytest --cov=videodub --cov-report=html --cov-report=term-missing
 
-test: ## Run tests
-	python -m pytest videodub/tests/
+# Run all code quality checks
+check: format lint type-check
 
-clean: ## Clean temporary files
-	rm -rf .pytest_cache
-	rm -rf .mypy_cache
-	rm -rf __pycache__
-	rm -rf */__pycache__
-	rm -rf */*/__pycache__
-	rm -rf dist
-	rm -rf build
-	rm -rf *.egg-info
+# Format code
+format:
+	black src/ tests/
+	isort src/ tests/
+
+# Run linting
+lint:
+	flake8 src/ tests/
+	bandit -r src/
+
+# Run type checking
+type-check:
+	mypy src/
+
+# Clean build artifacts
+clean:
+	rm -rf build/ dist/ *.egg-info/ .pytest_cache/ htmlcov/ .coverage
+
+# Build package
+build: clean
+	python -m build
+	twine check dist/*
+
+# Build documentation
+docs:
+	@echo "Building documentation..."
+	@echo "Documentation available in docs/"
+
+# Publish to PyPI
+publish: build
+	twine upload dist/*
+
+# Security scanning
+security:
+	bandit -r src/
+	safety check
+
+# Generate SBOM
+sbom:
+	cyclonedx-py -i requirements.txt -o bom.xml --format xml
+
+# Run all CI checks locally
+ci: check test security sbom
+
+# Development environment setup
+dev-setup: install check test
+	@echo "Development environment ready!"
+
+# Pre-commit hook
+pre-commit:
+	$(MAKE) check
+	$(MAKE) test
