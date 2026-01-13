@@ -192,7 +192,7 @@ jobs:
     
     # 将构建好的包文件作为工件上传保存
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         # 工件名称
         name: python-package-distributions

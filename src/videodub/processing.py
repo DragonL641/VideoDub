@@ -123,7 +123,7 @@ class VideoProcessor:
         src_lang: str,
         tgt_lang: str,
         use_en_as_intermediate: bool,
-    ) -> dict[Any, Any]:
+    ):
         """Transcribe audio and translate if needed."""
         print("Recognizing speech...")
         transcription_result = model.transcribe(
