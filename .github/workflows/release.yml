@@ -1,5 +1,6 @@
 name: Release Management
 
+# 只有当你给仓库打版本标签（如 git tag v1.0.0 并推送到 GitHub）时，这个发布工作流才会自动运行。
 on:
   push:
     tags:

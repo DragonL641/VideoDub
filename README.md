@@ -1,190 +1,151 @@
 # VideoDub
 
-A tool for dubbing videos with automatic subtitle generation using OpenAI Whisper.
+A professional tool for automatic video subtitle generation using OpenAI Whisper.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/release/python-380/)
+[![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 
-## Overview
+## Quick Start
 
-VideoDub is a Python application that leverages OpenAI's Whisper model to automatically generate subtitles for videos. The tool intelligently selects the optimal Whisper model based on your system's hardware capabilities and generates SRT subtitle files that can be used with your video content.
+### Installation
+```bash
+git clone https://github.com/Dragon/VideoDub.git
+cd VideoDub
+pip install -r requirements.txt
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+```
+
+### Usage
+```bash
+# Generate subtitles
+videodub video.mp4 --src-lang ja --tgt-lang zh
+
+# Development mode
+python videodub_cli.py video.mp4 --src-lang ja --tgt-lang zh
+```
 
 ## Features
+- Automatic subtitle generation with OpenAI Whisper
+- **Intelligent hardware-aware model selection** (optimized for your system)
+- Multi-language support with translation
+- **Real-time progress tracking with visual progress bars** (for audio extraction)
+- **Quality-focused processing** for accurate results
+- Cross-platform compatibility
 
-- Automatic subtitle generation using state-of-the-art speech recognition
-- Intelligent model selection based on system resources (CPU, GPU, memory)
-- Support for multiple languages
-- Cross-platform compatibility (Windows, macOS, Linux)
-- Easy command-line interface
+## Quality-Focused Processing
 
-## Prerequisites
+VideoDub prioritizes subtitle quality and accuracy:
 
-- Python 3.8 or higher
-- FFmpeg for audio extraction
-- Hardware requirements vary by model size (more powerful hardware enables larger, more accurate models)
+### Quality Optimizations
+- **Default quality settings**: Uses Whisper's default parameters for best results
+- **Apple Silicon Macs**: Recommended `small` model for high accuracy
+- **Model selection**: Automatically chooses quality-appropriate models
 
-## Quick Start Guide
+### Translation Accuracy Enhancements
+- **Context-aware translation**: Considers neighboring segments for better translation quality
+- **Improved text alignment**: Better extraction of relevant translated portions
+- **Enhanced error handling**: Graceful fallbacks when translation models fail
+- **Two-step translation optimization**: Improved intermediate language processing
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/Dragon/VideoDub.git
-   cd VideoDub
-   ```
-
-2. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-   ```
-
-3. **Run the application**
-   ```bash
-   python videodub_cli.py path/to/your/video.mp4 --src-lang ja --tgt-lang zh
-   ```
-
-4. **Check the output**
-   The generated subtitle file will be created in the same directory as the input video with the target language code in the filename.
-
-
-
-## Installation
-
-### Using pip with requirements.txt
-
+### Performance Analysis
+Analyze your system's capabilities:
 ```bash
-# Clone the repository
-git clone https://github.com/Dragon/VideoDub.git
-cd VideoDub
-
-# Install dependencies from requirements.txt
-pip install -r requirements.txt
-
-# Install PyTorch with CPU support (recommended for compatibility):
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+python performance_analyzer.py
 ```
 
-### From source
+### Quality vs Speed Trade-offs
+For best results:
+- **Highest Quality**: `small` or `medium` models
+- **Balanced**: `base` model
+- **Fastest**: `tiny` model (lower accuracy)
 
+## Progress Tracking
+
+VideoDub features **improved** real-time progress tracking during audio extraction:
+
+```
+Extracting audio: [████████████████████] 100.0% Extracting audio completed in 0.3s
+```
+
+**Note**: Speech recognition progress is handled by Whisper internally for optimal quality.
+
+**Key Improvements:**
+- ✅ **No duplicate progress bars** - Clean single progress display for audio extraction
+- ✅ **Accurate completion** - Progress reaches 100% when operation finishes
+- ✅ **Realistic timing** - Better time estimation for small files
+
+**Requirements:**
+- Activate virtual environment: `source .venv/bin/activate`
+- Ensure FFmpeg is installed and accessible
+
+**Verification:**
 ```bash
-# Clone the repository
-git clone https://github.com/Dragon/VideoDub.git
-cd VideoDub
-
-# Install in development mode
-pip install -e .
-
-# Install PyTorch with CPU support (recommended for compatibility):
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-```
+# Test the improved progress system
+python test_progress_fixes.py
 ```
 
-## Usage
+## Building Executables
 
-### Command Line Interface
+VideoDub can be compiled into standalone executables for Windows and macOS using Nuitka.
 
-First, make sure you have installed the dependencies and PyTorch as shown in the Installation section.
-
-To run the application from command line:
-
+### Setup Build Environment
 ```bash
-# Generate subtitles for a video
-python videodub_cli.py path/to/video.mp4 --src-lang ja --tgt-lang zh
+# Install build dependencies
+pip install -r requirements-dev.txt
 
-# Generate subtitles with custom source and target languages
-python videodub_cli.py path/to/video.mp4 --src-lang en --tgt-lang es
-
-# Enable English as intermediate language for translation when direct translation model is not available
-python videodub_cli.py path/to/video.mp4 --src-lang ja --tgt-lang zh --use-en-as-intermediate
-
-# Note: --use-en-as-intermediate is a flag that doesn't take a value
-# When present, it enables English as intermediate language for translation
+# Or use the setup script
+./scripts/setup_build_env.sh
 ```
 
-### As a Library
-
-```python
-from videodub.process_video import generate_subtitles
-
-# Generate subtitles for a video
-generate_subtitles("path/to/video.mp4", src_lang="ja", tgt_lang="zh")
-
-# Generate subtitles with English as intermediate language for translation
-generate_subtitles("path/to/video.mp4", src_lang="ja", tgt_lang="zh", use_en_as_intermediate=True)
-```
-
-## Configuration
-
-The application automatically selects the optimal Whisper model based on your system's specifications:
-- On Apple Silicon Macs: Selects 'small' or 'medium' models depending on available memory
-- With NVIDIA GPUs: Selects larger models ('large-v3') if sufficient VRAM is available
-- On systems with limited resources: Falls back to lighter models ('base', 'small')
-
-### Translation Options
-
-- **Direct Translation**: When a direct translation model is available (e.g., from Japanese to Chinese), the application will use it directly
-- **English as Intermediate**: If `--use-en-as-intermediate` is enabled and no direct translation model is available, the application will:
-  1. Translate from source language to English
-  2. Translate from English to target language
-- **Fallback**: If no translation models are available, the application falls back to Whisper's built-in translation (English only)
-
-## Architecture
-
-The project follows a modular structure:
-
-```
-videodub/
-├── __init__.py
-├── main.py              # Main application logic
-├── process_video.py     # Core video processing and transcription logic
-├── utils/
-│   ├── __init__.py
-│   └── select_model.py  # Model selection logic
-├── videodub_cli.py      # Command-line interface entry point
-└── requirements.txt     # Project dependencies
-```
-
-## Development
-
-### Setup
-
+### Build Commands
 ```bash
-# Install all dependencies
-pip install -r requirements.txt
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+# Build for current platform
+python scripts/build.py
+
+# Build for specific platform
+python scripts/build.py --platform macos
+python scripts/build.py --platform windows
+
+# Build for all platforms
+python scripts/build.py --all
+
+# Clean previous builds
+python scripts/build.py --clean
+
+# Custom output filename
+python scripts/build.py --output myapp
+
+# Show all options
+python scripts/build.py --help
 ```
 
-### Running Tests
-
+### Platform-Specific Scripts
 ```bash
-# Run tests (if available)
-python -m pytest videodub/tests/
+# macOS
+./scripts/build_macos.sh
+
+# Windows
+scripts\build_windows.bat
 ```
 
-### Running the Application
+## Troubleshooting
 
-```bash
-# Run with command line interface
-python videodub_cli.py path/to/video.mp4 --src-lang ja --tgt-lang zh
+### Common Issues and Solutions
 
-# Or import as a module
-python -c "from videodub.process_video import generate_subtitles; generate_subtitles('path/to/video.mp4', 'ja', 'zh')"
-```
+**FFmpeg "Invalid duration" Error**
+- **Problem**: `Invalid duration for option ss: -t` error during audio extraction
+- **Solution**: This has been fixed in the latest version. The code no longer passes invalid `None` parameters to FFmpeg.
 
-## Contributing
+**Subtitles Generated in Wrong Language**
+- **Problem**: Subtitles appear in source language instead of target language
+- **Solution**: This was caused by duplicate code blocks preventing translation. Fixed in the latest version.
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Ensure code quality standards are met (`make check`)
-5. Commit your changes (`git commit -m 'Add amazing feature'`)
-6. Push to the branch (`git push origin feature/amazing-feature`)
-7. Open a Pull Request
+**Progress Bar Issues**
+- **Problem**: Double progress bars or incorrect timing
+- **Solution**: See the Progress Tracking section above for the current improved implementation.
+
+## Documentation
+For detailed documentation, see [docs/index.md](docs/index.md)
 
 ## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- OpenAI for the Whisper model
-- The machine learning community for continued advances in speech recognition
+MIT License - see [LICENSE](LICENSE) file for details.

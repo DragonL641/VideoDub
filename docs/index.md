@@ -1,276 +1,215 @@
 # VideoDub Documentation
 
-Welcome to the VideoDub documentation! This guide will help you understand and use VideoDub effectively.
-
 ## Table of Contents
-
 - [Installation](#installation)
-- [Quick Start](#quick-start)
-- [Advanced Usage](#advanced-usage)
+- [Usage](#usage)
+- [Features](#features)
+- [Progress Tracking](#progress-tracking)
+- [Architecture](#architecture)
+- [Development](#development)
 - [API Reference](#api-reference)
-- [Configuration](#configuration)
-- [Troubleshooting](#troubleshooting)
-- [Contributing](#contributing)
 
 ## Installation
 
 ### Prerequisites
+- Python 3.9 or higher
+- FFmpeg for audio extraction
+- Hardware requirements vary by model size
 
-- Python 3.8 or higher
-- FFmpeg (for audio extraction)
-- At least 4GB RAM (8GB+ recommended)
-
-### Install from PyPI
-
+### Quick Installation
 ```bash
-pip install videodub
-```
-
-### Install from Source
-
-```bash
+# Clone the repository
 git clone https://github.com/Dragon/VideoDub.git
 cd VideoDub
+
+# Install dependencies
+pip install -r requirements.txt
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+
+# Install in development mode
 pip install -e .
 ```
 
-### Install Development Dependencies
+## Usage
 
+### Command Line Interface
 ```bash
-pip install -e .[dev]
+# Generate subtitles for a video
+videodub path/to/video.mp4 --src-lang ja --tgt-lang zh
+
+# With English as intermediate language
+videodub path/to/video.mp4 --src-lang ja --tgt-lang zh --use-en-as-intermediate
+
+# Direct script execution (development)
+python videodub_cli.py path/to/video.mp4 --src-lang ja --tgt-lang zh
 ```
 
-## Quick Start
-
-### Command Line Usage
-
-```bash
-# Basic usage - Japanese to Chinese subtitles
-videodub video.mp4 --src-lang ja --tgt-lang zh
-
-# English to Spanish with intermediate translation
-videodub video.mp4 --src-lang en --tgt-lang es --use-en-as-intermediate
-
-# Check version
-videodub --version
-```
-
-### Python API Usage
-
+### As a Library
 ```python
-from videodub import generate_subtitles
+from videodub.core import generate_subtitles
 
 # Generate subtitles
-subtitle_path = generate_subtitles(
-    video_path="video.mp4",
-    src_lang="ja",
-    tgt_lang="zh"
-)
-print(f"Subtitles saved to: {subtitle_path}")
+result = generate_subtitles("path/to/video.mp4", src_lang="ja", tgt_lang="zh")
 ```
 
-## Advanced Usage
+## Features
 
-### Language Support
+### Core Features
+- Automatic subtitle generation using OpenAI Whisper
+- Intelligent model selection based on system resources
+- Multi-language support
+- Cross-platform compatibility
+- Real-time progress tracking
 
-VideoDub supports translation between many language pairs:
+### Progress Tracking
+VideoDub includes advanced progress tracking for long-running operations:
 
+#### Visual Progress Display
+```
+Extracting audio: [██████████░░░░░░░░░░] 50.0% (45s remaining) Processing audio
+Speech recognition: [████████████████████] 100.0% Speech recognition completed in 127.3s
+```
+
+#### How It Works
+1. **Audio Extraction Progress**: Tracks FFmpeg processing with file size-based estimation
+2. **Speech Recognition Progress**: Monitors Whisper transcription with duration-based estimation
+3. **Automatic Cleanup**: Progress resources are properly managed
+
+#### Technical Implementation
+The progress system uses a modular observer pattern:
+```
+ProgressObserver (Interface)
+    ↓
+ConsoleProgressObserver (Implementation)
+    ↓
+ProgressTracker (Manager)
+```
+
+## Architecture
+
+### Project Structure
+```
+src/videodub/
+├── __init__.py
+├── __version__.py       # Version information
+├── cli.py               # Command-line interface
+├── config.py            # Configuration settings
+├── core.py              # Core functionality interface
+├── model_selection.py   # Model selection logic
+├── processing.py        # Core video processing and transcription
+├── progress/            # Progress tracking module
+│   └── __init__.py      # Progress tracking classes
+└── utils/
+    └── __init__.py      # Utility functions
+```
+
+### Key Components
+
+#### Video Processing Pipeline
+1. **Model Selection**: Automatically chooses optimal Whisper model based on hardware
+2. **Audio Extraction**: Uses FFmpeg to extract audio from video files
+3. **Speech Recognition**: Processes audio with Whisper for transcription
+4. **Translation**: Handles language translation when needed
+5. **Subtitle Generation**: Creates SRT subtitle files
+
+#### Progress Tracking System
+- Thread-safe progress updates
+- Smart time estimation algorithms
+- Graceful error handling
+- Resource cleanup management
+
+## Development
+
+### Setup
 ```bash
-# Direct translation (when available)
-videodub video.mp4 --src-lang fr --tgt-lang de
+# Install development dependencies
+pip install -r requirements-dev.txt
 
-# Via English intermediate (fallback)
-videodub video.mp4 --src-lang ko --tgt-lang ru --use-en-as-intermediate
+# Run tests
+python -m pytest tests/
+
+# Run with coverage
+python -m pytest tests/ --cov=src/videodub
 ```
 
-### Model Selection
+### Code Quality
+```bash
+# Run linting
+make check
 
-The tool automatically selects the optimal Whisper model based on your system:
+# Format code
+make format
 
-- **Apple Silicon Macs**: `small` or `medium` models
-- **NVIDIA GPUs**: `large-v3` for high precision
-- **CPU systems**: `base` or `small` for efficiency
-
-You can check the recommended model:
-
-```python
-from videodub.model_selection import select_optimal_model
-
-recommended_model = select_optimal_model()
-print(f"Recommended model: {recommended_model}")
+# Run security checks
+make security
 ```
 
-### Batch Processing
-
-Process multiple videos:
-
-```python
-import os
-from videodub import generate_subtitles
-
-video_directory = "/path/to/videos"
-for filename in os.listdir(video_directory):
-    if filename.endswith(('.mp4', '.mov', '.avi')):
-        video_path = os.path.join(video_directory, filename)
-        try:
-            generate_subtitles(video_path, src_lang="ja", tgt_lang="en")
-            print(f"Processed: {filename}")
-        except Exception as e:
-            print(f"Failed to process {filename}: {e}")
-```
+### Testing
+The test suite includes:
+- Unit tests for core functionality
+- Integration tests for processing pipeline
+- Progress tracking system verification
 
 ## API Reference
 
-### `generate_subtitles()`
+### Core Functions
 
-Main function for generating subtitles.
+#### `generate_subtitles()`
+```python
+def generate_subtitles(
+    video_path: str,
+    src_lang: str = "ja",
+    tgt_lang: str = "zh",
+    use_en_as_intermediate: bool = False
+) -> str
+```
+Generates subtitles for a video file.
 
 **Parameters:**
-- `video_path` (str): Path to the video file
-- `src_lang` (str, optional): Source language code (default: "ja")
-- `tgt_lang` (str, optional): Target language code (default: "zh")
-- `use_en_as_intermediate` (bool, optional): Use English as intermediate for translation (default: False)
+- `video_path`: Path to the video file
+- `src_lang`: Source language code (default: "ja")
+- `tgt_lang`: Target language code (default: "zh")
+- `use_en_as_intermediate`: Use English as intermediate language for translation
 
 **Returns:**
-- `str`: Path to the generated subtitle file
-
-**Example:**
-```python
-from videodub import generate_subtitles
-
-subtitle_file = generate_subtitles(
-    "my_video.mp4",
-    src_lang="ko",
-    tgt_lang="en",
-    use_en_as_intermediate=True
-)
-```
+- Path to the generated subtitle file
 
 ### Configuration
 
-Customize VideoDub behavior through the `Config` class:
-
+#### Config Class
 ```python
-from videodub.config import Config
-
-config = Config()
-config.AUDIO_SAMPLE_RATE = 22050  # Higher quality audio
-config.DEFAULT_USE_EN_AS_INTERMEDIATE = True  # Always use English intermediate
+class Config:
+    DEFAULT_SRC_LANG: str = "ja"
+    DEFAULT_TGT_LANG: str = "zh"
+    AUDIO_SAMPLE_RATE: int = 16000
+    TEMP_AUDIO_FILE: str = "temp_audio.wav"
 ```
 
-## Configuration
+### Progress Tracking
 
-### Environment Variables
+#### ProgressTracker
+Main progress management class for tracking operation progress.
 
-VideoDub respects these environment variables:
-
-```bash
-# Force specific device
-export VIDEODUB_DEVICE=cuda  # or cpu, mps
-
-# Custom temporary directory
-export VIDEODUB_TEMP_DIR=/tmp/videodub
-
-# Whisper model cache directory
-export WHISPER_CACHE_DIR=~/.cache/whisper
-```
-
-### Configuration File
-
-Create `~/.videodub/config.json`:
-
-```json
-{
-    "default_source_language": "ja",
-    "default_target_language": "zh",
-    "use_english_intermediate": false,
-    "preferred_model": "medium",
-    "audio_sample_rate": 16000
-}
-```
+#### TimeEstimator
+Utility class for estimating operation durations:
+- `estimate_ffmpeg_extraction_time()`: Estimates audio extraction time
+- `estimate_whisper_transcription_time()`: Estimates transcription time
+- `get_video_duration()`: Gets actual video duration
 
 ## Troubleshooting
 
 ### Common Issues
 
-**1. FFmpeg not found**
+1. **Missing FFmpeg**: Ensure FFmpeg is installed and accessible in PATH
+2. **Import Errors**: Check that all dependencies are installed
+3. **CUDA/MPS Issues**: The system automatically falls back to CPU mode
+4. **Memory Issues**: Use smaller Whisper models for limited memory systems
+
+### Debugging
+Enable verbose output by setting environment variables:
 ```bash
-# Install FFmpeg
-# Ubuntu/Debian
-sudo apt install ffmpeg
-
-# macOS
-brew install ffmpeg
-
-# Windows
-# Download from https://ffmpeg.org/download.html
-```
-
-**2. CUDA Out of Memory**
-```bash
-# Force CPU usage
-export VIDEODUB_DEVICE=cpu
-# or use smaller Whisper models
-```
-
-**3. Translation Models Not Found**
-```bash
-# Enable English intermediate translation
-videodub video.mp4 --use-en-as-intermediate
-
-# Check available models
-pip list | grep transformers
-```
-
-**4. Slow Performance**
-```bash
-# Use smaller model
-export WHISPER_MODEL=small
-
-# Ensure GPU acceleration (if available)
-nvidia-smi  # Check GPU status
-```
-
-### Debug Mode
-
-Enable verbose logging:
-
-```bash
-# Command line
-videodub video.mp4 --debug
-
-# Python API
-import logging
-logging.basicConfig(level=logging.DEBUG)
+export VIDEO_DUB_DEBUG=1
 ```
 
 ## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines.
-
-### Development Setup
-
-```bash
-# Clone and setup
-git clone https://github.com/Dragon/VideoDub.git
-cd VideoDub
-python -m venv venv
-source venv/bin/activate
-pip install -e .[dev]
-
-# Run tests
-pytest
-
-# Check code quality
-make check
-```
-
-## License
-
-VideoDub is released under the MIT License. See [LICENSE](LICENSE) for details.
-
-## Acknowledgments
-
-- [OpenAI Whisper](https://github.com/openai/whisper) for speech recognition
-- [Hugging Face Transformers](https://huggingface.co/transformers/) for translation models
-- The open-source community for continuous innovation
+See [CONTRIBUTING.md](../CONTRIBUTING.md) for contribution guidelines.

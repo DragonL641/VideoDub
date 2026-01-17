@@ -1,0 +1,23 @@
+{
+    "main_module": "videodub_cli.py",
+    "product_name": "VideoDub",
+    "product_version": "0.2.0",
+    "company_name": "VideoDub",
+    "file_description": "Professional video subtitle generation tool",
+    "file_version": "0.2.0.0",
+    "legal_copyright": "Copyright (c) 2024 VideoDub",
+    "icon_path": null,
+    "onefile": true,
+    "enable_console": true,
+    "windows_uac_admin": false,
+    "windows_uac_uiaccess": false,
+    "macos_create_app_bundle": false,
+    "linux_onefile_icon": null,
+    "windows_icon_from_ico": null,
+    "windows_product_name": "VideoDub",
+    "windows_file_description": "VideoDub - Automatic Subtitle Generator",
+    "windows_product_version": "0.2.0.0",
+    "windows_company_name": "VideoDub",
+    "windows_legal_copyright": "Copyright (c) 2024 VideoDub",
+    "windows_file_version": "0.2.0.0"
+}
